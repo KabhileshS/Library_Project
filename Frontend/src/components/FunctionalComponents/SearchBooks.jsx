@@ -1,19 +1,31 @@
-import { useState } from "react";
-
+import { useState,useEffect } from "react";
+import axios from "axios";
 const SearchBooks = () => {
   const [query, setQuery] = useState("");
-  const [books] = useState([
-    { id: 1, title: "The Great Gatsby", author: "F. Scott Fitzgerald" },
-    { id: 2, title: "To Kill a Mockingbird", author: "Harper Lee" },
-    { id: 3, title: "1984", author: "George Orwell" },
-  ]);
+  const [books,setBooks]=useState([])
+  const [loading,setLoading]=useState(false)
+  const [error,setError]=useState("")
+  useEffect(()=>{
+    const fetchBooks=async()=>{
+      setLoading(true)
+      try{
+        const response=await axios.get("http://localhost:3002/search")
+        setBooks(response.data.books)
+      }
+      catch(error){
+        setError("Error fetching Books")
+        console.error("Fetch error:",error)
+      }
+      setLoading(false);
+    }
+    fetchBooks();
+  },[])
 
-  // Filter books based on query (search in both title & author)
-  const filteredBooks = books.filter(
-    (book) =>
+  const filteredBooks=books.filter(book=>
       book.title.toLowerCase().includes(query.toLowerCase()) ||
       book.author.toLowerCase().includes(query.toLowerCase())
-  );
+    
+  )
 
   return (
     <div>
@@ -24,10 +36,12 @@ const SearchBooks = () => {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
+      {loading ? <p>Loading books...</p> : null}
+      {error ? <p style={{ color: "red" }}>{error}</p> : null}
       <ul>
         {filteredBooks.length > 0 ? (
           filteredBooks.map((book) => (
-            <li key={book.id}>
+            <li key={book._id}>
               <strong>{book.title}</strong> - {book.author}
             </li>
           ))

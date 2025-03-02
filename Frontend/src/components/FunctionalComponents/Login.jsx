@@ -2,6 +2,7 @@ import React from 'react'
 import {Link} from 'react-router-dom'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 const Login = () => {
     const navigate=useNavigate()
     const [email,setEmail]=useState("")
@@ -11,18 +12,20 @@ const Login = () => {
     const handleLogin=async(event)=>{
         event.preventDefault()
         setLoading(true)
-        // const req=await axios.post("http://localhost:3001/login",{
-        //   email:email,
-        //   password:password
-        // })
-        // const message=req.data.message
-        // const isLogin=req.data.isLogin
-        // if(isLogin){
-        //   alert(message)
+        const req=await axios.post("http://localhost:3002/login",{
+          email:email,
+          password:password
+        })
+        const message=req.data.message
+        const isLogin=req.data.isLogin
+        if(isLogin){
+          alert(message)
+          localStorage.setItem("token",req.data.token)
+          console.log(req.data.token)
           navigate('/search')
-        // }else{
-        //   alert(message)
-        // }
+        }else{
+          alert(message)
+        }
         setLoading(false)
       }
   return (

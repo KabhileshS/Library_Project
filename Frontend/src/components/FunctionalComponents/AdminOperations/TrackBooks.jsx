@@ -40,9 +40,9 @@ const TrackBooks = () => {
 
       {/* Filter Buttons */}
       <button onClick={() => setFilter("all")}>Show All</button>
-      <button onClick={() => setFilter("ontime")}>Show Borrowed</button>
+      <button onClick={() => setFilter("ontime")}>Show OnTime</button>
       <button onClick={() => setFilter("overdue")}>Show Overdue</button>
-
+      <h3>{filter.toUpperCase()}</h3>
       <table border="1" style={{ marginTop: "10px" }}>
         <thead>
           <tr>

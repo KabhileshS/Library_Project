@@ -1,4 +1,4 @@
-import Home from "./components/FunctionalComponents/Home";
+// import Home from "./components/FunctionalComponents/Home";
 import Login from "./components/FunctionalComponents/Login";
 import Signup from "./components/FunctionalComponents/Signup";
 import Navbar from "./components/FunctionalComponents/Navbar";
@@ -11,6 +11,7 @@ import TrackBooks from "./components/FunctionalComponents/AdminOperations/TrackB
 import ManageRequests from "./components/FunctionalComponents/AdminOperations/ManageRequests";
 import Returns from "./components/FunctionalComponents/AdminOperations/Returns";
 import Request from "./components/FunctionalComponents/UserOperations/Request"
+import UserDetails from "./components/FunctionalComponents/UserDetails";
 import {BrowserRouter,Routes,Route} from 'react-router-dom'
 import { Navigate } from "react-router-dom";
 function App() {
@@ -39,6 +40,7 @@ function App() {
               <Route path="/returns" element={<><Navbar /><Returns /></>} />
               <Route path="/requests" element={<><Navbar /><ManageRequests /></>} />
               <Route path="/requestbook" element={<><Navbar /><Request /></>} />
+              <Route path="/userdetails" element={<><Navbar /><UserDetails /></>} />
               {/* Redirect unknown routes to Signup */}
               <Route path="*" element={<Navigate to="/signup" />} />
             </Routes>

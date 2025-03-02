@@ -1,23 +1,64 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const Request = () => {
   const [query, setQuery] = useState("");
-  const [books, setBooks] = useState([
-    { id: 1, title: "The Great Gatsby", author: "F. Scott Fitzgerald", available: true },
-    { id: 2, title: "To Kill a Mockingbird", author: "Harper Lee", available: true },
-    { id: 3, title: "1984", author: "George Orwell", available: false }, // Unavailable book
-  ]);
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const requestBook = (id) => {
-    setBooks(books.map(book => book.id === id ? { ...book, available: false } : book));
-    alert("Book requested successfully!");
+  useEffect(() => {
+    const fetchBooks = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get("http://localhost:3002/books");
+        setBooks(response.data.books);
+      } catch (error) {
+        setError("Error fetching books");
+        console.error("Fetch error:", error);
+      }
+      setLoading(false);
+    };
+    fetchBooks();
+  }, []);
+
+  const requestBook = async (bookId) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("User not authenticated. Please log in.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3002/request",
+        { bookId },
+        { headers: { "x-access-token": token } }
+      );
+      
+      if (response.status === 201) {
+        alert("Book requested successfully!");
+        setBooks(books.map(book => book._id === bookId ? { ...book, available: false } : book));
+      } else {
+        alert("Failed to request book.");
+      }
+    } catch (error) {
+      console.error("Request error:", error);
+      alert("Error requesting book.");
+    }
   };
+
+  const filteredBooks = books.filter(
+    (book) =>
+      book.title.toLowerCase().includes(query.toLowerCase()) ||
+      book.author.toLowerCase().includes(query.toLowerCase())
+  );
 
   return (
     <div>
       <h2>Request to Borrow Books</h2>
-
-      {/* Search Input */}
+      
       <input
         type="text"
         placeholder="Search by title or author"
@@ -25,21 +66,23 @@ const Request = () => {
         onChange={(e) => setQuery(e.target.value)}
       />
 
-      {/* Filter & Display Books */}
+      {loading && <p>Loading books...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
       <ul>
-        {books
-          .filter(book =>
-            book.title.toLowerCase().includes(query.toLowerCase()) ||
-            book.author.toLowerCase().includes(query.toLowerCase())
-          )
-          .map((book) => (
+        {filteredBooks.length > 0 ? (
+          filteredBooks.map((book) => (
             <li key={book.id}>
-              {book.title} - {book.author} {book.available ? "(Available)" : "(Not Available)"}
+              <strong>{book.title}</strong> - {book.author}{" "}
+              {book.available ? "(Available)" : "(Not Available)"}
               {book.available && (
                 <button onClick={() => requestBook(book.id)}>Request</button>
               )}
             </li>
-          ))}
+          ))
+        ) : (
+          <li>No books found</li>
+        )}
       </ul>
     </div>
   );

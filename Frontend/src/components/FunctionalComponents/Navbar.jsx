@@ -32,7 +32,8 @@ const Navbar = () => {
               </ol>)}
             </div>
             <li><Link to='/contact' className="link">Contact</Link></li>
-            <li><Link to='/login' className="link">Logout</Link></li>
+
+            <li><Link to='/userdetails' className="link">Profile</Link></li>
         </nav>
     </header>
   )

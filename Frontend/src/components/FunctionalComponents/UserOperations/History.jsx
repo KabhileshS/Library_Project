@@ -1,11 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const History = () => {
-  const [history, setHistory] = useState([
-    { id: 1, book: "The Great Gatsby", borrowDate: "2024-02-10", dueDate: "2025-02-28" },
-    { id: 2, book: "1984", borrowDate: "2024-02-15", dueDate: "2024-02-25" },
-    { id: 3, book: "To Kill a Mockingbird", borrowDate: "2024-02-18", dueDate: "2024-02-22" },
-  ]);
+  // const [history, setHistory] = useState([
+  //   { id: 1, book: "The Great Gatsby", borrowDate: "2024-02-10", dueDate: "2025-02-28" },
+  //   { id: 2, book: "1984", borrowDate: "2024-02-15", dueDate: "2024-02-25" },
+  //   { id: 3, book: "To Kill a Mockingbird", borrowDate: "2024-02-18", dueDate: "2024-02-22" },
+  // ]);
+
+  const [history, setHistory] = useState([]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      axios
+        .get("http://localhost:3002/history", {
+          headers: { "x-access-token": token },
+        })
+        .then((response) => {
+          setHistory(response.data.borrowHistory || []); // Setting borrow history
+        })
+        .catch((error) => {
+          console.error("Error fetching borrow history:", error);
+        });
+    }
+  }, []);
 
   // Get today's date
   const today = new Date().toISOString().split("T")[0];
@@ -20,6 +39,7 @@ const History = () => {
             <th>Borrow Date</th>
             <th>Due Date</th>
             <th>Status</th>
+            <th>Returned</th>
           </tr>
         </thead>
         <tbody>
@@ -31,6 +51,7 @@ const History = () => {
               <td style={{ color: entry.dueDate < today ? "red" : "green" }}>
                 {entry.dueDate < today ? "Overdue" : "On Time"}
               </td>
+              <td>{entry.returned ? "Yes" : "No"}</td>
             </tr>
           ))}
         </tbody>
