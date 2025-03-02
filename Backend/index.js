@@ -11,8 +11,8 @@ const jwt=require('jsonwebtoken')
 const app = express();
 
 app.use(cors({
-    origin:['https://mern-stack-temp.vercel.app','http://localhost:5173'],
-    methods:['GET','POST',['DELETE']],
+    origin:['https://library-project-nine.vercel.app/','http://localhost:5173'],
+    methods:['GET','POST','DELETE'],
     allowedHeaders:['Content-Type','Authorization','x-access-token']
 }))
 
