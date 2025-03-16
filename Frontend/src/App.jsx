@@ -14,6 +14,8 @@ import Request from "./components/FunctionalComponents/UserOperations/Request"
 import UserDetails from "./components/FunctionalComponents/UserDetails";
 import {BrowserRouter,Routes,Route} from 'react-router-dom'
 import { Navigate } from "react-router-dom";
+import  './App.css'
+
 function App() {
   return (
     <>

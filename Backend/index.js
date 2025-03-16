@@ -114,7 +114,7 @@ app.post("/login",async(req,res)=>{
         firstname:user.firstName,
         email:user.email
     }
-    const token=jwt.sign(payload,process.env.SECRET_KEY,{expiresIn:"1hr"})
+    const token=jwt.sign(payload,process.env.SECRET_KEY,{expiresIn:"10hr"})
     console.log(token)
     res.status(201).json({isLogin:true,auth:true,token:token,user:user,message:"Login Successful"})
     
@@ -215,46 +215,59 @@ app.post("/request", async (req, res) => {
         const decoded = jwt.verify(token, process.env.SECRET_KEY);
         const userId = decoded.id;
 
-        console.log("Request body:", req.body); // Debugging log
-
+        // console.log("Request body:", req.body); // ✅ Debugging Log
         const { bookId } = req.body;
-        console.log("Extracted bookId:", bookId); // Debugging log
+        // console.log("Extracted bookId:", bookId); // ✅ Debugging Log
+        // console.log("User ID:", userId); // ✅ Debugging Log 
 
         if (!bookId) {
             return res.status(400).json({ error: "Book ID is required." });
         }
-
-        const user = await Signup.findById(userId);
-        if (!user) {
-            return res.status(404).json({ error: "User not found." });
+        // ✅ Check if the book is already requested
+        const request = await Request.findOne({ userId, bookId });
+        if (request) {
+            return res.status(400).json({ error: "Book already requested." });
         }
 
-        const book = await Books.findById(bookId);
-        if (!book || !book.available) {
-            return res.status(400).json({ error: "Book is not available." });
-        }
+        // ✅ Create new request entry
+        const newRequest = new Request({ userId, bookId });
+        await newRequest.save();
 
-        book.available = false;
-        await book.save();
-
-        const borrowDate = new Date();
-        const dueDate = new Date();
-        dueDate.setDate(dueDate.getDate() + 14);
-
-        user.borrowHistory.push({
-            bookId,
-            borrowDate,
-            dueDate,
-            returned: false,
-        });
-
-        await user.save();
-
-        res.status(201).json({ message: "Book requested successfully." });
+        return res.status(201).json({ message: "Book requested successfully." });
 
     } catch (error) {
         console.error("Error processing book request:", error);
-        res.status(500).json({ error: "Internal Server Error." });
+        return res.status(500).json({ error: "Internal Server Error." });
+    }
+});
+
+app.get("/requests", async (req, res) => {
+    try {
+        const requests = await Request.find();
+        if (requests.length === 0) {
+            return res.status(404).json({ message: "No requests available right now" });
+        }
+
+        const formattedRequests = await Promise.all(
+            requests.map(async (request) => {
+                const user = await Signup.findById(request.userId);
+                const book = await Books.findById(request.bookId);
+                
+                return {
+                    _id: request._id,
+                    title: book ? book.title : "Unknown Book",
+                    requester: user ? user.firstName : "Unknown Borrower",
+                    status: request.status,
+                    userId: request.userId,
+                    bookId: request.bookId // Include this for easy request update
+                };
+            })
+        );
+
+        res.status(200).json({ message: "Here are the Requests", requests: formattedRequests });
+    } catch (error) {
+        console.error("Error fetching requests:", error);
+        res.status(500).json({ message: "Server error while fetching requests" });
     }
 });
 
@@ -294,11 +307,11 @@ app.post("/accept",async (req,res)=>{
         request.status = "Approved";
         await request.save();
 
-        // Find the request in the book's borrowRequests and update its status
-        const requestIndex = book.borrowRequests.findIndex(req => req._id.toString() === requestId);
-        if (requestIndex !== -1) {
-            book.borrowRequests[requestIndex].status = "Approved";
-        }
+        // // Find the request in the book's borrowRequests and update its status
+        // const requestIndex = book.borrowRequests.findIndex(req => req._id.toString() === requestId);
+        // if (requestIndex !== -1) {
+        //     book.borrowRequests[requestIndex].status = "Approved";
+        // }
 
         // Calculate due date (e.g., 14 days from now)
         const dueDate = new Date();
@@ -364,6 +377,34 @@ app.post("/reject", async (req, res) => {
     }
 });
 
+// app.get("/returns", async(req,res)=>{
+//     try{
+//         const books = await Books.find();
+
+//         if (books.length === 0) { // Check if books array is empty
+//             return res.status(404).json({ message: "No books available right now" });
+//         }
+
+//         const formattedBooks=books.map(book=>{
+//             const lastBorrow=book.borrowHistory.length>0?book.borrowHistory[book.borrowHistory.length-1]:null;
+//             const availability=(!lastBorrow|| lastBorrow.returned)?"Available":"Not Available";
+
+//             return{
+//                 _id:book._id,
+//                 title:book.title,
+//                 author:book.author,
+//                 availability:availability
+//             }
+//         })
+
+//         res.status(200).json({ message: "Here are the books", books:formattedBooks });
+//     }
+//     catch(error){
+//         console.error("Error fetching books:", error);
+//         res.status(500).json({ message: "Server error while fetching books" });
+//     }
+// })
+
 app.post("/return", async (req, res) => {
     try {
         const { bookId } = req.body;
@@ -378,18 +419,21 @@ app.post("/return", async (req, res) => {
             return res.status(404).json({ error: "Book not found." });
         }
 
-        // Find the latest borrow entry that is not returned
-        const borrowEntry = book.borrowHistory.find(entry => !entry.returned);
-        if (!borrowEntry) {
+        // Find the latest borrow entry 
+        const lastBorrow=book.borrowHistory.length>0?book.borrowHistory[book.borrowHistory.length-1]:null;
+        if (!lastBorrow) {
             return res.status(400).json({ error: "This book is not currently borrowed." });
+        }
+        if(lastBorrow.returned){
+            return res.status(404).json({error:"Book Already returned"})
         }
 
         // Update the book's borrow history (mark as returned)
-        borrowEntry.returned = true;
+        lastBorrow.returned = true;
         await book.save();
 
         // Find the user and update their borrow history
-        const user = await Signup.findOne({ _id: borrowEntry.userId });
+        const user = await Signup.findOne({ _id: lastBorrow.userId });
         if (user) {
             const userBorrowEntry = user.borrowHistory.find(entry => entry.bookId.toString() === bookId && !entry.returned);
             if (userBorrowEntry) {
@@ -432,6 +476,47 @@ app.get("/search", async (req, res) => {
         res.status(500).json({ message: "Server error while fetching books" });
     }
 });
+
+app.get("/track", async (req, res) => {
+    try {
+        const books = await Books.find();
+
+        if (books.length === 0) {
+            return res.status(404).json({ message: "No books available right now" });
+        }
+
+        // Fetch borrower details for each book
+        const formattedBooks = await Promise.all(
+            books.map(async (book) => {
+                if (!book.borrowHistory || book.borrowHistory.length === 0) {
+                    return {
+                        _id: book._id,
+                        title: book.title,
+                        borrower: "Not borrowed",
+                        dueDate: null
+                    };
+                }
+
+                const lastBorrow = book.borrowHistory[book.borrowHistory.length - 1];
+                const user = await Signup.findById(lastBorrow.userId);
+                const borrowerName = user ? user.firstName : "Unknown Borrower";
+
+                return {
+                    _id: book._id,
+                    title: book.title,
+                    borrower: borrowerName,
+                    dueDate: lastBorrow.dueDate
+                };
+            })
+        );
+
+        res.status(200).json({ message: "Here are the books", books: formattedBooks });
+    } catch (error) {
+        console.error("Error fetching books:", error);
+        res.status(500).json({ message: "Server error while fetching books" });
+    }
+});
+
 
 
 app.get("/history", async (req, res) => {

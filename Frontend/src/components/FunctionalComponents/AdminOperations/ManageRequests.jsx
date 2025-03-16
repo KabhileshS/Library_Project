@@ -32,7 +32,11 @@ const ManageRequests = () => {
       });
 
       if (response.status === 200) {
-        setRequests(requests.map(req => (req._id === id ? { ...req, status: newStatus } : req)));
+        setRequests((prevRequests) =>
+          prevRequests.map((req) =>
+            req._id === id ? { ...req, status: newStatus } : req
+          )
+        );
         alert(`Request ${newStatus}`);
       } else {
         alert("Failed to update request.");
@@ -43,45 +47,123 @@ const ManageRequests = () => {
     }
   };
 
-  const filteredRequests = requests.filter(
-    (req) =>
-      req.status === "Pending" &&
-      (req.book.toLowerCase().includes(search.toLowerCase()) || req.user.toLowerCase().includes(search.toLowerCase()))
-  );
-
   return (
-    <div>
-      <h2>Manage Borrow Requests</h2>
+    <div style={styles.container}>
+      <h2 style={styles.heading}>Manage Borrow Requests</h2>
 
       <input
         type="text"
         placeholder="Search by user or book..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
+        style={styles.searchInput}
       />
 
-      {loading && <p>Loading requests...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {loading && <p style={styles.loading}>Loading requests...</p>}
+      {error && <p style={styles.error}>{error}</p>}
 
-      {filteredRequests.length === 0 ? (
-        <p>No pending requests.</p>
+      {requests.length === 0 ? (
+        <p style={styles.noRequests}>No pending requests.</p>
       ) : (
-        <ul>
-          {filteredRequests.map((request) => (
-            <li key={request._id}>
-              {request.user} requested <b>{request.book}</b>
-              <button onClick={() => updateRequest(request._id, request.userId, request.bookId, "Approved")}>
-                Approve ✅
-              </button>
-              <button onClick={() => updateRequest(request._id, request.userId, request.bookId, "Rejected")}>
-                Reject ❌
-              </button>
-            </li>
-          ))}
+        <ul style={styles.list}>
+          {requests
+            .filter(
+              (req) =>
+                req.status === "Pending" &&
+                (req.title.toLowerCase().includes(search.toLowerCase()) ||
+                 req.requester.toLowerCase().includes(search.toLowerCase()))
+            )
+            .map((request) => (
+              <li key={request._id} style={styles.listItem}>
+                <span>
+                  <b>{request.requester}</b> requested <b>{request.title}</b>
+                </span>
+                <div>
+                  <button
+                    style={styles.approveButton}
+                    onClick={() => updateRequest(request._id, request.userId, request.bookId, "Approved")}
+                  >
+                    Approve ✅
+                  </button>
+                  <button
+                    style={styles.rejectButton}
+                    onClick={() => updateRequest(request._id, request.userId, request.bookId, "Rejected")}
+                  >
+                    Reject ❌
+                  </button>
+                </div>
+              </li>
+            ))}
         </ul>
       )}
     </div>
   );
+};
+
+// Inline styles for a clean UI
+const styles = {
+  container: {
+    maxWidth: "600px",
+    margin: "auto",
+    padding: "20px",
+    borderRadius: "10px",
+    boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
+    backgroundColor: "#f9f9f9",
+  },
+  heading: {
+    textAlign: "center",
+    color: "#333",
+  },
+  searchInput: {
+    width: "100%",
+    padding: "10px",
+    marginBottom: "10px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+  },
+  loading: {
+    textAlign: "center",
+    color: "#555",
+  },
+  error: {
+    color: "red",
+    textAlign: "center",
+  },
+  noRequests: {
+    textAlign: "center",
+    color: "#777",
+  },
+  list: {
+    listStyle: "none",
+    padding: 0,
+  },
+  listItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "10px",
+    borderBottom: "1px solid #ddd",
+    backgroundColor: "#fff",
+    borderRadius: "5px",
+    marginBottom: "10px",
+  },
+  approveButton: {
+    backgroundColor: "#28a745",
+    color: "white",
+    padding: "5px 10px",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    marginRight: "5px",
+  },
+  rejectButton: {
+    backgroundColor: "#dc3545",
+    color: "white",
+    padding: "5px 10px",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+  },
 };
 
 export default ManageRequests;

@@ -2,12 +2,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 const History = () => {
-  // const [history, setHistory] = useState([
-  //   { id: 1, book: "The Great Gatsby", borrowDate: "2024-02-10", dueDate: "2025-02-28" },
-  //   { id: 2, book: "1984", borrowDate: "2024-02-15", dueDate: "2024-02-25" },
-  //   { id: 3, book: "To Kill a Mockingbird", borrowDate: "2024-02-18", dueDate: "2024-02-22" },
-  // ]);
-
   const [history, setHistory] = useState([]);
 
   useEffect(() => {

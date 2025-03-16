@@ -21,25 +21,65 @@ const UserDetails = () => {
   }, []);
 
   return (
-    <footer>
+    <footer
+      style={{
+        background: "#f8f9fa",
+        padding: "20px",
+        textAlign: "center",
+        borderTop: "2px solid #ddd",
+        marginTop: "20px",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
       {user ? (
-        <h1>
-          Welcome, 
-          <ul>
-            <li>Name:{user?.firstName}</li>
-            <li>Email:{user?.email} </li>
-            <li>PhoneNo:{user?.phoneNumber}!</li>
-        </ul> 
-        </h1>
+        <div>
+          <h1 style={{ color: "#333", fontSize: "24px", marginBottom: "10px" }}>
+            Welcome, {user?.firstName}!
+          </h1>
+          <ul
+            style={{
+              listStyle: "none",
+              padding: "0",
+              margin: "10px 0",
+              fontSize: "18px",
+              color: "#555",
+            }}
+          >
+            <li>
+              <strong>Name:</strong> {user?.firstName}
+            </li>
+            <li>
+              <strong>Email:</strong> {user?.email}
+            </li>
+            <li>
+              <strong>Phone No:</strong> {user?.phoneNumber}
+            </li>
+            <li>
+              <strong>Role: </strong> {user?.role}
+            </li>
+          </ul>
+        </div>
       ) : (
-        <h1>Loading user details...</h1>
+        <h1 style={{ color: "#007bff", fontSize: "22px" }}>Loading user details...</h1>
       )}
       <button
         onClick={() => {
           localStorage.removeItem("token");
           window.location.href = "/login"; // Redirect
-        }}>Logout</button>
-
+        }}
+        style={{
+          background: "#dc3545",
+          color: "white",
+          border: "none",
+          padding: "10px 20px",
+          fontSize: "16px",
+          cursor: "pointer",
+          borderRadius: "5px",
+          marginTop: "10px",
+        }}
+      >
+        Logout
+      </button>
     </footer>
   );
 };
