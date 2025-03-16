@@ -17,7 +17,7 @@ const Signup = () => {
     const REACT_APP_DEPLOYED="https://library-project-2bbk.onrender.com"
     try {
       const apiUrl = REACT_APP_LOCAL || REACT_APP_DEPLOYED; // Use environment variable or fallback to production URL
-      const req = await axios.post("https://localhost:3002/signup", {
+      const req = await axios.post("http://localhost:3002/signup", {
         firstName: firstName,
         email: email,
         password: password,
