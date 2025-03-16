@@ -10,11 +10,18 @@ const cors=require('cors')
 const jwt=require('jsonwebtoken')
 const app = express();
 
-app.use(cors({
-    origin:['https://library-project-nine.vercel.app/','http://localhost:5173'],
-    methods:['GET','POST','DELETE'],
-    allowedHeaders:['Content-Type','Authorization','x-access-token']
-}))
+// ✅ Fix CORS by explicitly allowing preflight requests
+const corsOptions = {
+    origin: ["https://library-project-nine.vercel.app", "http://localhost:5173"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allow all necessary methods
+    allowedHeaders: ["Content-Type", "Authorization","x-access-token"], // Allow essential headers
+    credentials: true // Allow cookies & authentication headers
+};
+
+app.use(cors(corsOptions));
+
+// ✅ Handle preflight requests (OPTIONS)
+app.options("*", cors(corsOptions));
 
 app.use(express.json())
 const PORT = 3002;
@@ -28,6 +35,10 @@ mdb.connect(process.env.MONGODB_URL)   //if doesnt connect use this inside paran
     console.log("Check your Connection String", err);
 });
 
+// ✅ Add a test route to check CORS
+app.get("/cors-test", (req, res) => {
+    res.json({ message: "CORS is working properly!" });
+});
   
 app.get("/", (req, res) => {
     res.send("<h1>Welcome to Backend Server Hehekeke </h1>");
