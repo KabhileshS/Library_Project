@@ -14,7 +14,7 @@ const AddBooks = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const response = await axios.get("http://localhost:3002/books");
+        const response = await axios.get("https://library-project-2bbk.onrender.com/books");
         const sortedBooks = response.data.books.sort((a, b) =>
           a.title.localeCompare(b.title)
         ); // Sort books alphabetically
@@ -39,7 +39,7 @@ const AddBooks = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3002/add", {
+      const response = await axios.post("https://library-project-2bbk.onrender.com/add", {
         title,
         author,
       });

@@ -8,7 +8,7 @@ const UserDetails = () => {
     const token = localStorage.getItem("token");
     if (token) {
       axios
-        .get("http://localhost:3002/getUserDetails", {
+        .get("https://library-project-2bbk.onrender.com/getUserDetails", {
           headers: { "x-access-token": token },
         })
         .then((response) => {

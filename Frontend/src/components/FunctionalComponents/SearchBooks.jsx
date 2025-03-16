@@ -11,7 +11,7 @@ const SearchBooks = () => {
     const fetchBooks = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:3002/search");
+        const response = await axios.get("https://library-project-2bbk.onrender.com/search");
         setBooks(response.data.books);
       } catch (error) {
         setError("Error fetching Books");

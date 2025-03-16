@@ -11,7 +11,7 @@ const Request = () => {
     const fetchBooks = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:3002/books");
+        const response = await axios.get("https://library-project-2bbk.onrender.com/books");
         setBooks(response.data.books);
       } catch (error) {
         setError("Error fetching books");
@@ -33,7 +33,7 @@ const Request = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3002/request",
+        "https://library-project-2bbk.onrender.com/request",
         { bookId },
         { headers: { "x-access-token": token } }
       );

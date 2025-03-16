@@ -8,7 +8,7 @@ const History = () => {
     const token = localStorage.getItem("token");
     if (token) {
       axios
-        .get("http://localhost:3002/history", {
+        .get("https://library-project-2bbk.onrender.com/history", {
           headers: { "x-access-token": token },
         })
         .then((response) => {

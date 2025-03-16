@@ -11,7 +11,7 @@ const ManageRequests = () => {
     const fetchRequests = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:3002/requests");
+        const response = await axios.get("https://library-project-2bbk.onrender.com/requests");
         setRequests(response.data.requests);
       } catch (error) {
         setError("Error fetching requests");
@@ -25,7 +25,7 @@ const ManageRequests = () => {
   const updateRequest = async (id, userId, bookId, newStatus) => {
     try {
       const endpoint = newStatus === "Approved" ? "accept" : "reject";
-      const response = await axios.post(`http://localhost:3002/${endpoint}`, {
+      const response = await axios.post(`https://library-project-2bbk.onrender.com/${endpoint}`, {
         requestId: id,
         userId,
         bookId

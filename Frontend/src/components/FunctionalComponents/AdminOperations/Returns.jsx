@@ -13,7 +13,7 @@ const Returns = () => {
     const fetchBooks = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:3002/search");
+        const response = await axios.get("https://library-project-2bbk.onrender.com/search");
         setBooks(response.data.books);
       } catch (error) {
         setError("Error fetching books");
@@ -28,7 +28,7 @@ const Returns = () => {
   const handleReturn = async (id) => {
     setReturning(id); // Show loading state for the book being returned
     try {
-      const response = await axios.post("http://localhost:3002/return", { bookId: id });
+      const response = await axios.post("https://library-project-2bbk.onrender.com/return", { bookId: id });
 
       // Update book list with returned status
       setBooks((prevBooks) =>
